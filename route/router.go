@@ -1,7 +1,7 @@
 package route
 
 import (
-	"echo-gorm/api"
+	"excel-read/api"
 
 	"github.com/labstack/echo"
 )
@@ -9,8 +9,7 @@ import (
 func Init() *echo.Echo {
 	e := echo.New()
 
-	e.GET("/", api.Home)
-
-	e.GET("/users", api.GetUsers)
+	e.POST("/inputbooks", api.InputBooks)
+	e.GET("/getbooks", api.GetBooks)
 	return e
 }

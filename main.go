@@ -1,8 +1,8 @@
 package main
 
 import (
-	"echo-gorm/db"
-	"echo-gorm/route"
+	"excel-read/db"
+	"excel-read/route"
 )
 
 func main() {

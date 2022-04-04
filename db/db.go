@@ -1,8 +1,8 @@
 package db
 
 import (
-	"echo-gorm/config"
-	"echo-gorm/model"
+	"excel-read/config"
+	"excel-read/model"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
@@ -16,11 +16,12 @@ func Init() {
 	configuration := config.GetConfig()
 	connect_string := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", configuration.DB_USERNAME, configuration.DB_PASSWORD, configuration.DB_NAME)
 	db, err = gorm.Open("mysql", connect_string)
+	db.LogMode(true)
 	// defer db.Close()
 	if err != nil {
 		panic("DB Connection Error")
 	}
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Books{})
 
 }
 
