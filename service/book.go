@@ -3,6 +3,7 @@ package service
 import (
 	"excel-read/db"
 	"excel-read/model"
+	"excel-read/repository"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -32,7 +33,7 @@ func ReadFile(c echo.Context) (multipart.File, error) {
 func InputAndValidate(c echo.Context, xlsx *excelize.File) error {
 	db := db.DbManager()
 	res := model.BooksList{}
-	getCell := func (cell string) string {
+	getCell := func(cell string) string {
 		return xlsx.GetCellValue("Sheet1", cell)
 	}
 
@@ -79,4 +80,59 @@ func InputAndValidate(c echo.Context, xlsx *excelize.File) error {
 
 		return c.String(http.StatusOK, "Success")
 	}
+}
+
+func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pagination, error) {
+	// Initializing default
+	//	var mode string
+	limit := 10
+	page := 1
+	sort := "no"
+	query := c.Request().URL.Query()
+	var err error
+
+	for key, value := range query {
+		queryValue := value[len(value)-1]
+		switch key {
+		case "limit":
+			limit, err = strconv.Atoi(queryValue)
+			if err != nil {
+				log.Println("LimitAtoi LimitAtoiError", err)
+				return nil, nil, c.String(http.StatusBadRequest, "Limit must be a number")
+			}
+			if limit == 0 {
+				limit = 10
+			}
+			break
+		case "page":
+			page, err = strconv.Atoi(queryValue)
+			if err != nil {
+				log.Println("PageAtoi PageAtoiError", err)
+				return nil, nil, c.String(http.StatusBadRequest, "Page must be a number")
+			}
+			if page == 0 {
+				page = 1
+			}
+			break
+		case "sort":
+			sort = queryValue
+			break
+		}
+	}
+
+	pagination := model.Pagination{
+		Limit: limit,
+		Page:  page,
+		Sort:  sort,
+	}
+
+	bookLists, err := repository.GetAllBooks(&pagination)
+	if err != nil {
+		log.Println("GetAllBooks GetBooksError", err)
+		return nil, nil, c.String(http.StatusBadRequest, err.Error())
+	}
+
+	totRowsAndPages := repository.GetTotalRowsAndPages(&pagination)
+
+	return bookLists, totRowsAndPages, nil
 }
