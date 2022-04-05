@@ -88,6 +88,7 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 	limit := 10
 	page := 1
 	sort := "no"
+	search := ""
 	query := c.Request().URL.Query()
 	var err error
 
@@ -117,13 +118,17 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 		case "sort":
 			sort = queryValue
 			break
+		case "search":
+			search = "%" + queryValue + "%"
+			break
 		}
 	}
 
 	pagination := model.Pagination{
-		Limit: limit,
-		Page:  page,
-		Sort:  sort,
+		Limit:  limit,
+		Page:   page,
+		Sort:   sort,
+		Search: search,
 	}
 
 	bookLists, err := repository.GetAllBooks(&pagination)
