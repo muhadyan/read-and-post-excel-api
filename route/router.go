@@ -15,6 +15,7 @@ func Init() *echo.Echo {
 
 	e.POST("/inputbooks", api.InputBooks, service.IsAuthenticated)
 	e.GET("/getbooks", api.GetBooks)
+	e.GET("/getpdf", api.GetPdf)
 
 	return e
 }

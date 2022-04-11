@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
+	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.7.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
@@ -16,6 +17,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

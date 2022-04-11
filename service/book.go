@@ -4,6 +4,7 @@ import (
 	"excel-read/db"
 	"excel-read/model"
 	"excel-read/repository"
+	"excel-read/pdf"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -140,4 +141,27 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 	totRowsAndPages := repository.GetTotalRowsAndPages(&pagination)
 
 	return bookLists, totRowsAndPages, nil
+}
+
+func PdfBooksList(c echo.Context) error {
+	db := db.DbManager()
+	book := model.BooksList{}
+
+	db.Find(&book)
+
+	buf, err := pdf.ParseTemplate(c, book)
+	if err != nil {
+		return err
+	}
+
+	pdfg, err := pdf.GeneratePdf(c, buf)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=books.pdf")
+	c.Response().Header().Set("Content-Type", "application/pdf")
+	c.Response().WriteHeader(http.StatusOK)
+	c.Response().Write(pdfg.Bytes())
+	return nil
 }

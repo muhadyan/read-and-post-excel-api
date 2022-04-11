@@ -21,3 +21,11 @@ func GetBooks(c echo.Context) error {
 		"Data":        bookLists,
 	})
 }
+
+func GetPdf(c echo.Context) error {
+	err := service.PdfBooksList(c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return nil
+}
