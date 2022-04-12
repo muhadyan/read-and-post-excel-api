@@ -4,7 +4,9 @@ import (
 	"excel-read/db"
 	"excel-read/model"
 	"net/http"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"golang.org/x/crypto/bcrypt"
@@ -38,6 +40,23 @@ func CheckLogin(c echo.Context, username, password string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func GenerateToken(c echo.Context, username string) error {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["username"] = username
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
+	t, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": t,
+	})
 }
 
 var IsAuthenticated = middleware.JWTWithConfig(middleware.JWTConfig{
