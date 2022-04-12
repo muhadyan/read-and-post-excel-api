@@ -10,12 +10,15 @@ import (
 func Init() *echo.Echo {
 	e := echo.New()
 
-	e.GET("/generate-hash/:password", api.GenerateHashPassword)
-	e.POST("/login", api.CheckLogin)
+	e.POST("/signup", api.HandleSignUp)
+	e.POST("/login", api.HandleLogin)
 
-	e.POST("/inputbooks", api.InputBooks, service.IsAuthenticated)
-	e.GET("/getbooks", api.GetBooks)
-	e.GET("/getpdf", api.GetPdf)
+	book := e.Group("/book", service.IsAuthenticated)
+	{
+		book.POST("/inputbooks", api.InputBooks)
+		book.GET("/getbooks", api.GetBooks)
+		book.GET("/getpdf", api.GetPdf)
+	}
 
 	return e
 }
