@@ -10,11 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
-}
-
 func CheckPasswordHash(password, hash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
@@ -48,3 +43,25 @@ func CheckLogin(c echo.Context, username, password string) (bool, error) {
 var IsAuthenticated = middleware.JWTWithConfig(middleware.JWTConfig{
 	SigningKey: []byte("secret"),
 })
+
+func SignUp(c echo.Context, username string, password string) error {
+	db := db.DbManager()
+	users := model.Users{}
+
+	db.First(&users, "username = ?", username)
+
+	if username == users.Username {
+		return c.String(http.StatusConflict, "Username already exist")
+	}
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user := model.Users{Username: username, Password: string(bytes)}
+
+	db.Create(&user)
+
+	return c.String(http.StatusOK, "Signup Success")
+}

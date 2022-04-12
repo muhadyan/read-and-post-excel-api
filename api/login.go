@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-func CheckLogin(c echo.Context) error {
+func HandleLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
@@ -39,12 +39,14 @@ func CheckLogin(c echo.Context) error {
 	})
 }
 
-func GenerateHashPassword(c echo.Context) error {
-	password := c.Param("password")
+func HandleSignUp(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
 
-	hash, err := service.HashPassword(password)
+	err := service.SignUp(c, username, password)
 	if err != nil {
 		return err
 	}
-	return c.String(http.StatusOK, hash)
+
+	return nil
 }
