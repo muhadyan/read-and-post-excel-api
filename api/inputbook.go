@@ -10,6 +10,7 @@ import (
 )
 
 func InputBooks(c echo.Context) error {
+	createby := service.GetTokenData(c, "username").(string)
 	src, err := service.ReadFile(c)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
@@ -21,7 +22,7 @@ func InputBooks(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Wrong File Type Input")
 	}
 
-	err = service.InputAndValidate(c, xlsx)
+	err = service.InputAndValidate(c, xlsx, createby)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}

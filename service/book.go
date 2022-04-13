@@ -3,8 +3,8 @@ package service
 import (
 	"excel-read/db"
 	"excel-read/model"
-	"excel-read/repository"
 	"excel-read/pdf"
+	"excel-read/repository"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -12,26 +12,27 @@ import (
 	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 )
 
 func ReadFile(c echo.Context) (multipart.File, error) {
 	file, err := c.FormFile("excel")
 	if err != nil {
-		log.Println("FormFile WrongQueryParam", err)
+		log.Println("ReadFile FormFile", err)
 		return nil, c.String(http.StatusBadRequest, "Parameter Not Found")
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		log.Println("Open CannotOpenFile", err)
+		log.Println("ReadFile FileOpen", err)
 		return nil, c.String(http.StatusBadRequest, err.Error())
 	}
 	defer src.Close()
 	return src, nil
 }
 
-func InputAndValidate(c echo.Context, xlsx *excelize.File) error {
+func InputAndValidate(c echo.Context, xlsx *excelize.File, createby string) error {
 	db := db.DbManager()
 	res := model.BooksList{}
 	getCell := func(cell string) string {
@@ -56,25 +57,29 @@ func InputAndValidate(c echo.Context, xlsx *excelize.File) error {
 
 			no, err := strconv.Atoi(number)
 			if err != nil {
-				log.Println("Atoi CannotConvertToNum", err)
+				log.Println("InputAndValidate NoAtoi", err)
 				return c.String(http.StatusBadRequest, "Column 'No' must be a number")
 			}
 
 			if _, err := strconv.Atoi(author); err == nil {
+				log.Println("InputAndValidate AuthorAtoi", err)
 				return c.String(http.StatusBadRequest, "Column 'Author' must be a name")
 			}
 
 			res = append(res, model.Books{
-				No:     no,
-				Book:   bookname,
-				Author: author,
+				No:       no,
+				Book:     bookname,
+				Author:   author,
+				CreateBy: createby,
 			})
 		}
 		for _, b := range res {
 			book := model.Books{
-				No:     b.No,
-				Book:   b.Book,
-				Author: b.Author}
+				No:       b.No,
+				Book:     b.Book,
+				Author:   b.Author,
+				CreateBy: b.CreateBy,
+			}
 
 			db.Create(book)
 		}
@@ -83,7 +88,7 @@ func InputAndValidate(c echo.Context, xlsx *excelize.File) error {
 	}
 }
 
-func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pagination, error) {
+func GeneratePaginationFromRequest(c echo.Context, createby interface{}) (*model.BooksList, *model.Pagination, error) {
 	// Initializing default
 	//	var mode string
 	limit := 10
@@ -99,7 +104,7 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 		case "limit":
 			limit, err = strconv.Atoi(queryValue)
 			if err != nil {
-				log.Println("LimitAtoi LimitAtoiError", err)
+				log.Println("GeneratePaginationFromRequest LimitAtoi", err)
 				return nil, nil, c.String(http.StatusBadRequest, "Limit must be a number")
 			}
 			if limit == 0 {
@@ -109,7 +114,7 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 		case "page":
 			page, err = strconv.Atoi(queryValue)
 			if err != nil {
-				log.Println("PageAtoi PageAtoiError", err)
+				log.Println("GeneratePaginationFromRequest PageAtoi", err)
 				return nil, nil, c.String(http.StatusBadRequest, "Page must be a number")
 			}
 			if page == 0 {
@@ -132,13 +137,15 @@ func GeneratePaginationFromRequest(c echo.Context) (*model.BooksList, *model.Pag
 		Search: search,
 	}
 
-	bookLists, err := repository.GetAllBooks(&pagination)
+	bookLists, err := repository.GetAllBooks(&pagination, createby)
 	if err != nil {
-		log.Println("GetAllBooks GetBooksError", err)
 		return nil, nil, c.String(http.StatusBadRequest, err.Error())
 	}
 
-	totRowsAndPages := repository.GetTotalRowsAndPages(&pagination)
+	totRowsAndPages, err := repository.GetTotalRowsAndPages(&pagination, createby)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return bookLists, totRowsAndPages, nil
 }
@@ -164,4 +171,11 @@ func PdfBooksList(c echo.Context) error {
 	c.Response().WriteHeader(http.StatusOK)
 	c.Response().Write(pdfg.Bytes())
 	return nil
+}
+
+func GetTokenData(c echo.Context, key string) interface{} {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	res := claims[key]
+	return res
 }
