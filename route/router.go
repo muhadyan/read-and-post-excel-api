@@ -2,7 +2,7 @@ package route
 
 import (
 	"excel-read/api"
-	"excel-read/service"
+	"excel-read/auth"
 
 	"github.com/labstack/echo"
 )
@@ -13,7 +13,7 @@ func Init() *echo.Echo {
 	e.POST("/signup", api.HandleSignUp)
 	e.POST("/login", api.HandleLogin)
 
-	book := e.Group("/book", service.IsAuthenticated)
+	book := e.Group("/book", auth.IsAuthenticated)
 	{
 		book.POST("/inputbooks", api.InputBooks)
 		book.GET("/getbooks", api.GetBooks)

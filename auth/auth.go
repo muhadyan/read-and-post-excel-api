@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"excel-read/db"
@@ -11,6 +11,10 @@ import (
 	"github.com/labstack/echo/middleware"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var IsAuthenticated = middleware.JWTWithConfig(middleware.JWTConfig{
+	SigningKey: []byte("secret"),
+})
 
 func CheckPasswordHash(password, hash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
@@ -58,10 +62,6 @@ func GenerateToken(c echo.Context, username string) error {
 		"token": t,
 	})
 }
-
-var IsAuthenticated = middleware.JWTWithConfig(middleware.JWTConfig{
-	SigningKey: []byte("secret"),
-})
 
 func SignUp(c echo.Context, username string, password string) error {
 	db := db.DbManager()
