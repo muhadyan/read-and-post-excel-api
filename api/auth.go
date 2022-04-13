@@ -1,7 +1,7 @@
 package api
 
 import (
-	"excel-read/service"
+	"excel-read/auth"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -11,7 +11,7 @@ func HandleLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	res, err := service.CheckLogin(c, username, password)
+	res, err := auth.CheckLogin(c, username, password)
 	if err != nil {
 		return c.String(http.StatusNotFound, err.Error())
 	}
@@ -19,7 +19,7 @@ func HandleLogin(c echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	err = service.GenerateToken(c, username)
+	err = auth.GenerateToken(c, username)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func HandleSignUp(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	err := service.SignUp(c, username, password)
+	err := auth.SignUp(c, username, password)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.7.2
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/tkanos/gonfig v0.0.0-20210106201359-53e13348de2f
@@ -13,7 +13,6 @@ require (
 )
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
