@@ -1,9 +1,10 @@
 package model
 
 type Books struct {
-	No     int    `json:"no"`
-	Book   string `json:"book"`
-	Author string `json:"author"`
+	No       int    `json:"no"`
+	Book     string `json:"book"`
+	Author   string `json:"author"`
+	CreateBy string `json:"create_by"`
 }
 
 type BooksList []Books

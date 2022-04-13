@@ -2,16 +2,16 @@ package api
 
 import (
 	"excel-read/service"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
 func GetBooks(c echo.Context) error {
-	bookLists, rowPageList, err := service.GeneratePaginationFromRequest(c)
+	createby := service.GetTokenData(c, "username")
+
+	bookLists, rowPageList, err := service.GeneratePaginationFromRequest(c, createby)
 	if err != nil {
-		log.Println("GeneratePaginationFromRequest PaginationRequestError", err)
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
