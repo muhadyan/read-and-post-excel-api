@@ -150,11 +150,11 @@ func GeneratePaginationFromRequest(c echo.Context, createby interface{}) (*model
 	return bookLists, totRowsAndPages, nil
 }
 
-func PdfBooksList(c echo.Context) error {
+func PdfBooksList(c echo.Context, createby interface{}) error {
 	db := db.DbManager()
 	book := model.BooksList{}
 
-	db.Find(&book)
+	db.Where("create_by = ?", createby).Find(&book)
 
 	buf, err := pdf.ParseTemplate(c, book)
 	if err != nil {

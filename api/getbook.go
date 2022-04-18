@@ -23,7 +23,9 @@ func GetBooks(c echo.Context) error {
 }
 
 func GetPdf(c echo.Context) error {
-	err := service.PdfBooksList(c)
+	createby := service.GetTokenData(c, "username")
+
+	err := service.PdfBooksList(c, createby)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
